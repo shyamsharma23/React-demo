@@ -1,33 +1,39 @@
-import { FormEvent, useRef, useState } from "react";
+import axios from "axios";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 import Display from "./components/Display";
 
-function App() {
-  const obj: any = "Hello World";
-
+const App = () => {
+  const [data, setData] = useState<any>([]);
   const nameRef = useRef<any>();
-
-  const [data, setData] = useState<any>("World"); //useState hook
-  const handleSbmit = () => {
-    console.log("Changed the heading");
-    console.log(data);
-    setData("Hello World");
-  };
+  let obj: any;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     console.log(nameRef.current.value);
-    setData(nameRef.current.value);
+    obj = nameRef.current.value;
+    setData(obj);
   };
+  useEffect(() => {
+    const url = "http://localhost:5000/api/v1/todos";
+    axios
+      .get(url)
+      .then((res) => setData(res.data))
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
-    <>
-      <h1>{`Hello ${data}`}</h1>
+    <div>
       <form onSubmit={handleSubmit}>
-        <input type="text" ref={nameRef} />
-        <button className="btn btn-success ms-4">Change Heading</button>
+        <label htmlFor="name">Name</label>
+        <input type="text" id="name" ref={nameRef} />
+        <button className="btn btn-primary">Submit</button>
       </form>
-      <Display onSubmit={handleSbmit} value={obj} />
-    </>
+      <h1>{`Hello, welcome ${data[0]?.todo}`}</h1>
+      {data.map((item: any) => (
+        <Display value={item} key={item.todoId} />
+      ))}
+    </div>
   );
-}
+};
 
 export default App;
